@@ -1,8 +1,10 @@
+package Const;
+
 import java.lang.reflect.Type;
 import java.util.List;
 
 public class Constants {
-    static final List<String> STOP_WORDS = List.of(
+    public static final List<String> STOP_WORDS = List.of(
             "&", "a", "an", "the", "in", "on", "at",
             "to", "is", "are", "am", "was", "were",
             "be", "been", "being", "have", "has",
