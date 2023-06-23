@@ -1,26 +1,10 @@
+import WordProcessor.WordProcessingThread;
+import WordProcessor.WordProcessingThreadParams;
+
 import java.io.*;
 import java.util.*;
 
 public class Main {
-    static final List<String> stopWords = List.of(
-            "&", "a", "an", "the", "in", "on", "at",
-            "to", "is", "are", "am", "was", "were",
-            "be", "been", "being", "have", "has",
-            "had", "do", "does", "did", "will", "would",
-            "shall", "should", "may", "might", "must", "can",
-            "could", "of", "for", "from", "by", "with", "about",
-            "between", "among", "into", "onto", "upon", "after",
-            "before", "above", "under", "below", "over", "under",
-            "underneath", "since", "until", "till", "of", "off",
-            "out", "up", "down", "over", "under", "underneath", "since"
-            , "until", "till", "of", "off", "out", "up", "down", "over", "under"
-            , "underneath", "since", "until", "till", "of", "off", "out", "up",
-            "down", "over", "under", "underneath", "since", "until", "till", "of",
-            "off", "out", "up", "down", "over", "under", "underneath", "since", "until",
-            "till", "of", "off", "out", "up", "down", "over", "under", "underneath", "since",
-            "until", "till", "of", "off", "out", "up", "down", "over", "under", "underneath",
-            "since", "until", "till", "of", "off", "out", "up", "down", "over", "under", "underneath",
-            "since", "until", "till", "of", "off", "out", "up", "down", "over", "under", "underneath", "since", "until", "till");
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -89,25 +73,14 @@ public class Main {
         }
     }
 
-    private static Map<String, LinkedList<String>> getStringLinkedListMap(
-            Map<String, LinkedList<String>> data,
-            LinkedList<String> tokens) {
-
+    private static Map<String, LinkedList<String>> getStringLinkedListMap(Map<String, LinkedList<String>> data, LinkedList<String> tokens) {
         Map<String, LinkedList<String>> invertedIndex = new HashMap<>();
+
         final Integer[] index = {tokens.size()};
         ArrayList<Thread> threads = new ArrayList<>();
         for (String word : tokens) {
-            if (stopWords.contains(word)) continue;
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    System.out.print("\033[H\033[2J");
-                    System.out.flush();
-                    System.out.println("Processing word: " + index[0]-- + "/" + tokens.size());
-                    LinkedList<String> docs = getDocs(data, word);
-                    invertedIndex.put(word, docs);
-                }
-            });
+            if (Constants.STOP_WORDS.contains(word) || word.isBlank()) continue;
+            WordProcessingThread thread = new WordProcessingThread(new WordProcessingThreadParams(index[0]--,data, word.trim(), invertedIndex));
             threads.add(thread);
             thread.start();
 
@@ -122,15 +95,7 @@ public class Main {
         return invertedIndex;
     }
 
-    private static LinkedList<String> getDocs(Map<String, LinkedList<String>> data, String word) {
-        LinkedList<String> docs = new LinkedList<>();
-        for (String docsName : data.keySet()) {
-            if (data.get(docsName).contains(word)) {
-                docs.add(docsName);
-            }
-        }
-        return docs;
-    }
+
 
     private static void getFilesWords(Map<String, LinkedList<String>> data, File file) throws FileNotFoundException {
         Scanner reader = new Scanner(file);
@@ -139,7 +104,7 @@ public class Main {
             content.append(reader.nextLine());
         }
 
-        LinkedList<String> words = new LinkedList<>(Arrays.asList(content.toString().toUpperCase().split("\\s|'|\\.|!|\"|\"|,|:|;|\\?|\\(|\\)|\\[|\\]|\\{|\\}|\\*|/|\\\\")));
+        LinkedList<String> words = new LinkedList<>(Arrays.asList(content.toString().toUpperCase().split("\\s|'|\\.|!|\"|\"|,|:|;|\\?|\\(|\\)|\\[|\\]|\\{|\\}| |\\\\* |\\*|/|\\\\")));
         data.put(file.getName(), words);
     }
 
